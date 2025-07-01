@@ -1,0 +1,79 @@
+server:
+  port: 8280
+
+spring:
+  application:
+    name: API-GATEWAY
+    restclient:
+      user:
+        url: http://localhost:8081/services/be/user-service/
+
+      cloud:
+        gateway:
+          routes:
+            - id: user-service
+              uri: http://localhost:8080
+              predicates:
+                - Path=/services/be/user-service/**
+
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: codemirror17@gmail.com
+    password: olwjkegubzdcdwup
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+doc:
+  api:
+    path: /doc/api
+    title: auth API
+    description: Documentation for the Auth API
+    version: 1.0.0
+
+  group-configs:
+    - group: user-service
+      paths-to-match: /services/be/user-service/**
+      url: http://localhost:8080/services/be/user-service/v3/api-docs
+
+
+jwt:
+  signature: L3OaW5Jv7f9qT8U0pD7rYkJ9u3PxMfBcXlZAnKj2hFs=
+  expiration: 3600000  # 1 hora
+  refresh-expiration: 86400000  # 24 horas
+
+role-access:
+  CLIENT:
+    - /services/be/user-service/cv/**
+    - /services/be/offer-service/**
+  ADMIN:
+    - /services/be/admin-service/**
+    - /services/be/user-service/admin/**
+
+
+logging:
+  level:
+    org.springframework.web.cors: DEBUG
+    org.springframework.web.filter.CorsFilter: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.reactive.function.client: DEBUG
+    io.netty: DEBUG
+    reactor.netty: DEBUG
+    reactor.netty.channel: TRACE
+    reactor.netty.http.client: TRACE
+    reactor.netty.transport: TRACE
+
+
