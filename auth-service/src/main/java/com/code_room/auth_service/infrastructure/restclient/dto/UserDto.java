@@ -1,4 +1,4 @@
-package com.code_room.auth_service.infrastructure.controller.dto;
+package com.code_room.auth_service.infrastructure.restclient.dto;
 import com.code_room.auth_service.domain.Enum.Role;
 import lombok.Builder;
 import lombok.Data;

@@ -1,11 +1,10 @@
 package com.code_room.auth_service.infrastructure.controller;
 import com.code_room.auth_service.domain.Exception.LoginException;
 import com.code_room.auth_service.config.jwt.JwtService;
-import com.code_room.auth_service.domain.model.User;
 import com.code_room.auth_service.domain.ports.UserService;
 import com.code_room.auth_service.infrastructure.controller.dto.LoginDto;
 import com.code_room.auth_service.infrastructure.controller.dto.RefreshTokenRequest;
-import com.code_room.auth_service.infrastructure.controller.dto.UserDto;
+import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         try {
-            User user = userService.checkPassword(loginDto);
+            UserDto user = userService.checkPassword(loginDto);
             return ResponseEntity.ok(jwtService.buildResponseLogin(user));
 
         }catch (LoginException e){
@@ -61,7 +60,7 @@ public class AuthController {
         try {
             userService.verifyUser(code);
             return ResponseEntity.ok("Your account has been successfully verified. You can now log in.");
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity
                     .badRequest()
                     .body("Verification failed: " + e.getMessage());
@@ -73,7 +72,7 @@ public class AuthController {
         try {
             Map<String, Object> response = jwtService.buildResponseRefreshToken(request);
             return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
                     Map.of("message", e.getMessage(), "code", "401")
             );

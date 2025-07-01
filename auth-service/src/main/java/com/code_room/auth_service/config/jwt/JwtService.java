@@ -1,10 +1,8 @@
 package com.code_room.auth_service.config.jwt;
 
-import com.code_room.auth_service.domain.mapper.userMapper.UserMapper;
-import com.code_room.auth_service.domain.model.User;
 import com.code_room.auth_service.domain.ports.UserService;
 import com.code_room.auth_service.infrastructure.controller.dto.RefreshTokenRequest;
-import com.code_room.auth_service.infrastructure.repository.entities.UserEntity;
+import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -12,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,15 +30,15 @@ public class JwtService {
     @Autowired
     private UserService userService;
 
-    public String generateToken(User user) {
+    public String generateToken(UserDto user) {
         return buildToken(user, expirationMillis);
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(UserDto user) {
         return buildToken(user, refreshExpirationMillis);
     }
 
-    private String buildToken(User user, long expirationTime) {
+    private String buildToken(UserDto user, long expirationTime) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("role", user.getRole().name())
@@ -73,13 +72,13 @@ public class JwtService {
         }
     }
 
-    public Map<String, Object> buildResponseRefreshToken(RefreshTokenRequest refreshToken) {
+    public Map<String, Object> buildResponseRefreshToken(RefreshTokenRequest refreshToken) throws IOException {
         if (!isTokenValid(refreshToken.getRefresToken())) {
             throw new RuntimeException("Invalid refresh token");
         }
 
         String email = extractEmail(refreshToken.getRefresToken());
-        User user = userService.findByEmail(email);
+        UserDto user = userService.findByEmail(email);
 
         String newAccessToken = buildToken(user, expirationMillis);
 
@@ -93,14 +92,14 @@ public class JwtService {
 
     }
 
-    public Map<String,String> buildResponseLogin(User user){
+    public Map<String,String> buildResponseLogin(UserDto user){
         Map<String,String> response = new HashMap<>();
         String accessToken = generateToken(user);
         String refreshToken = generateRefreshToken(user);
 
         response.put("accessToken", accessToken);
         response.put("refreshToken", refreshToken);
-        response.put("userId", String.valueOf(user.getId()));
+        response.put("name", String.valueOf(user.getName() + " " + user.getLastName()));
         return response;
     }
 }

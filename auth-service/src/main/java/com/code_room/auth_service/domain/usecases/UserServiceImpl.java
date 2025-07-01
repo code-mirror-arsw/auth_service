@@ -1,74 +1,66 @@
 package com.code_room.auth_service.domain.usecases;
 
-import com.code_room.auth_service.domain.Exception.LoginException;
-import com.code_room.auth_service.domain.mapper.userMapper.UserMapper;
-import com.code_room.auth_service.domain.model.User;
+
 import com.code_room.auth_service.domain.ports.SendEmailService;
 import com.code_room.auth_service.domain.ports.UserService;
 import com.code_room.auth_service.infrastructure.controller.dto.LoginDto;
-import com.code_room.auth_service.infrastructure.controller.dto.UserDto;
-import com.code_room.auth_service.infrastructure.repository.UserRepository;
-import com.code_room.auth_service.infrastructure.repository.entities.UserEntity;
+import com.code_room.auth_service.infrastructure.restclient.UserApiService;
+import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import retrofit2.Response;
 
+import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    UserRepository userRepository;
 
     @Autowired
-    UserMapper userMapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    UserApiService userApiService;
 
     @Autowired
     private SendEmailService sendEmailService;
 
     @Override
-    public User findByEmail(String email){
-        UserEntity entity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User no found by email " + email));
-        return userMapper.toModelFromEntity(entity);
+    public UserDto findByEmail(String email) throws IOException {
+        Response<UserDto> response = userApiService.findByEmail(email)
+                .execute();
+
+        if(response.isSuccessful() || response.body() == null){
+            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+        }
+        return response.body();
     }
 
     @Override
-    public User checkPassword(LoginDto loginDto) {
-        UserEntity user = userRepository.findByEmail(loginDto.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    public UserDto checkPassword(LoginDto loginDto) throws IOException {
 
-        if(!user.isEnabled()){
-            throw new LoginException(LoginException.ErrorType.USER_NOT_VERIFIED);
+        Response<UserDto> response = userApiService.checkUser(loginDto)
+                .execute();
+
+        if(response.isSuccessful() || response.body() == null){
+            new RuntimeException("Error calling esternal api" + response.errorBody().string());
         }
 
-        if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-
-        return userMapper.toModelFromEntity(user);
+        return response.body();
     }
 
     @Override
-    public void registerUser(UserDto userDto, String password) {
-        Optional<UserEntity> existingUser = userRepository.findByEmail(userDto.getEmail());
-        if (existingUser.isPresent()) {
-            throw new RuntimeException("User already exists with this email.");
+    public void registerUser(UserDto userDto, String password) throws IOException {
+
+        Response<Map<String, String>> response = userApiService.createUser(userDto,password)
+                .execute();
+
+        if(response.isSuccessful() || response.body() == null){
+            new RuntimeException("Error calling esternal api" + response.errorBody().string());
         }
 
-        String encodedPassword = passwordEncoder.encode(password);
-        String verificationCode = generateVerificationCode();
-        UserEntity userEntity = userMapper.toEntityFromDto(userDto);
-        userEntity.setPassword(encodedPassword);
-        userEntity.setVerificationCode(verificationCode);
-        userEntity.setEnabled(false);
+        String code = response.body().get("verification code");
 
-        userRepository.save(userEntity);
 
-        sendEmailService.sendRegistrationSuccessEmail(userDto.getEmail(), userDto.getName(), verificationCode);
+        sendEmailService.sendRegistrationSuccessEmail(userDto.getEmail(), userDto.getName(), code);
     }
 
     private String generateVerificationCode() {
@@ -76,13 +68,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void verifyUser(String code) {
-        UserEntity user = userRepository.findByVerificationCode(code)
-                        .orElseThrow(() -> new RuntimeException("code no found"));
-        user.setEnabled(true);
-        user.setVerificationCode(null);
-        userRepository.save(user);
-        sendEmailService.sendAlreadyVerifiedEmail(user.getEmail(), user.getName());
+    public void verifyUser(String code) throws IOException {
+        Response<String> response = userApiService.verifyUser(code)
+                .execute();
+
+        if(response.isSuccessful() || response.body() == null){
+            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+        }
 
     }
 }

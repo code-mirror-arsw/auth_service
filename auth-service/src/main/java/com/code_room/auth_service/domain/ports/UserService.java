@@ -1,16 +1,16 @@
 package com.code_room.auth_service.domain.ports;
 
-import com.code_room.auth_service.domain.model.User;
 import com.code_room.auth_service.infrastructure.controller.dto.LoginDto;
-import com.code_room.auth_service.infrastructure.controller.dto.UserDto;
-import com.code_room.auth_service.infrastructure.repository.entities.UserEntity;
+import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
+
+import java.io.IOException;
 
 public interface UserService {
-    User findByEmail(String email);
+    UserDto findByEmail(String email) throws IOException;
 
-    User checkPassword(LoginDto login);
+    UserDto checkPassword(LoginDto login) throws IOException;
 
-    void registerUser(UserDto userDto, String password);
+    void registerUser(UserDto userDto, String password) throws IOException;
 
-    void verifyUser(String code);
+    void verifyUser(String code) throws IOException;
 }

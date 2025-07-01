@@ -1,24 +1,22 @@
 package com.code_room.auth_service.config.jwt;
 
-import com.code_room.auth_service.domain.model.User;
 import com.code_room.auth_service.domain.ports.UserService;
-import com.code_room.auth_service.infrastructure.repository.entities.UserEntity;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.List;
 
 @Component
-public class JwtFilter extends OncePerRequestFilter {
+public class JwtFilter implements WebFilter {
 
     @Autowired
     private JwtService jwtService;
@@ -27,31 +25,33 @@ public class JwtFilter extends OncePerRequestFilter {
     private UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        final String authHeader = request.getHeader("Authorization");
+        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            chain.doFilter(request, response);
-            return;
+            return chain.filter(exchange);
         }
 
-        final String token = authHeader.substring(7);
+        String token = authHeader.substring(7);
         String email = jwtService.extractEmail(token);
 
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            User user = userService.findByEmail(email);
-            if (user != null && jwtService.isTokenValid(token)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        user, null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+        if (email == null) {
+            return chain.filter(exchange);
         }
 
-        chain.doFilter(request, response);
+        return Mono.fromCallable(() -> userService.findByEmail(email))
+                .filter(user -> user != null && jwtService.isTokenValid(token))
+                .map(user -> {
+                    var authToken = new UsernamePasswordAuthenticationToken(
+                            user,
+                            null,
+                            List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                    );
+                    return new SecurityContextImpl(authToken);
+                })
+                .flatMap(ctx -> chain.filter(exchange)
+                        .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(ctx))))
+                .switchIfEmpty(chain.filter(exchange));
     }
 }
-
