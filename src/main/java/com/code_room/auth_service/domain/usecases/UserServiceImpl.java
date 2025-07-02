@@ -61,7 +61,6 @@ public class UserServiceImpl implements UserService {
 
         String code = response.body().get("verification code");
 
-
         sendEmailService.sendRegistrationSuccessEmail(userDto.getEmail(), userDto.getName(), code);
     }
 
@@ -74,7 +73,7 @@ public class UserServiceImpl implements UserService {
         Response<Map<String,String>> response = userApiService.verifyUser(code)
                 .execute();
 
-        if(response.isSuccessful() || response.body() == null){
+        if(!response.isSuccessful() || response.body() == null){
             String errorMsg = response.errorBody() != null ? response.errorBody().string() : "Empty error body";
             throw new RuntimeException("Error calling external API: " + errorMsg);
         }
