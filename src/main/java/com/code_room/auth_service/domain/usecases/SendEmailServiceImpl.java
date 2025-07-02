@@ -74,19 +74,24 @@ public class SendEmailServiceImpl implements SendEmailService {
                 "h2 { color: #1f3b75; }" +
                 "p { font-size: 16px; line-height: 1.6; }" +
                 ".code-box { margin-top: 20px; padding: 15px; background: #dceeff; border-radius: 8px; font-size: 20px; font-weight: bold; text-align: center; color: #0a3d62; }" +
+                ".btn { display:inline-block; margin-top:25px; padding:12px 20px; background:#1f3b75; color:#fff; text-decoration:none; border-radius:6px; font-weight:600; }" +
                 ".footer { margin-top: 30px; font-size: 12px; color: #888; }" +
                 "</style></head><body>" +
                 "<div class='container'>" +
                 "<h2>¡Hola, " + name + "! 👋</h2>" +
                 "<p>¡Bienvenido a <strong>Code Room</strong>! 💻 Estamos muy emocionados de tenerte como parte de nuestra comunidad de desarrolladores. 🤍</p>" +
-                "<p>Tu cuenta ha sido registrada correctamente. Para completar tu registro, por favor usa el siguiente código de verificación:</p>" +
+                "<p>Tu cuenta ha sido registrada correctamente. Para completar tu registro, por favor usa el siguiente código de verificación</p>" +
                 "<div class='code-box'>" + code + "</div>" +
-                "<p>Si no fuiste tú quien realizó esta solicitud, puedes ignorar este mensaje.</p>" +
+                "<p>En el siguiente link</p> " +
+                "<a href='http://localhost:5173/verificacion' class='btn'>http://localhost:5173/verificacion</a>" +
+                "<p style='margin-top:25px;'>Si no fuiste tú quien realizó esta solicitud, puedes ignorar este mensaje.</p>" +
                 "<p>¡Gracias por formar parte de <strong>Code Room</strong>! 🚀</p>" +
                 "<p><strong>– El equipo de Code Room 🧠</strong></p>" +
                 "<div class='footer'>Este es un mensaje automático. Por favor, no respondas a este correo.</div>" +
                 "</div></body></html>";
     }
+
+
 
     private String generateAlreadyVerifiedBody(String name) {
         return "<!DOCTYPE html>" +
