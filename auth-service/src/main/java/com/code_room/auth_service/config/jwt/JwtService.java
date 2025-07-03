@@ -99,7 +99,10 @@ public class JwtService {
 
         response.put("accessToken", accessToken);
         response.put("refreshToken", refreshToken);
-        response.put("name", String.valueOf(user.getName() + " " + user.getLastName()));
+        response.put("role", String.valueOf(user.getRole()));
+        response.put("id", String.valueOf(user.getId()));
+        response.put("email", String.valueOf(user.getEmail()));
+
         return response;
     }
 }

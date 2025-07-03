@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
         Response<UserDto> response = userApiService.findByEmail(email)
                 .execute();
 
-        if(response.isSuccessful() || response.body() == null){
+        if(!response.isSuccessful() || response.body() == null){
             new RuntimeException("Error calling esternal api" + response.errorBody().string());
         }
         return response.body();
@@ -40,9 +40,11 @@ public class UserServiceImpl implements UserService {
         Response<UserDto> response = userApiService.checkUser(loginDto)
                 .execute();
 
-        if(response.isSuccessful() || response.body() == null){
+        if(!response.isSuccessful() || response.body() == null){
             new RuntimeException("Error calling esternal api" + response.errorBody().string());
         }
+
+        System.out.println("datos"  + response.body());
 
         return response.body();
     }
@@ -53,7 +55,7 @@ public class UserServiceImpl implements UserService {
         Response<Map<String, String>> response = userApiService.createUser(userDto,password)
                 .execute();
 
-        if(response.isSuccessful() || response.body() == null){
+        if(!response.isSuccessful() || response.body() == null){
             new RuntimeException("Error calling esternal api" + response.errorBody().string());
         }
 
@@ -69,12 +71,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void verifyUser(String code) throws IOException {
-        Response<String> response = userApiService.verifyUser(code)
+        Response<Map<String, String>> response = userApiService.verifyUser(code)
                 .execute();
 
-        if(response.isSuccessful() || response.body() == null){
-            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+        if (!response.isSuccessful() || response.body() == null) {
+            throw new RuntimeException("Error calling external API: " + response.errorBody().string());
         }
-
     }
+
 }

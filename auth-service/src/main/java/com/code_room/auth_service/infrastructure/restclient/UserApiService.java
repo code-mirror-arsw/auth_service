@@ -15,8 +15,8 @@ public interface UserApiService {
     @GET("users/email/{email}")
     Call<UserDto> findByEmail(@Path("email") String email);
 
-    @GET("users//verify/")
-    Call<String> verifyUser(@Path("code") String code);
+    @GET("users/verify")
+    Call<Map<String,String>> verifyUser(@Query("code") String code);
 
     @POST("users/user-check")
     Call<UserDto> checkUser(@Body LoginDto loginDto);
