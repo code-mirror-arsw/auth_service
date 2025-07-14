@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 
+
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -28,26 +29,25 @@ public class UserServiceImpl implements UserService {
         Response<UserDto> response = userApiService.findByEmail(email)
                 .execute();
 
-        if(!response.isSuccessful() || response.body() == null){
-            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+        if(response.isSuccessful() || response.body() == null){
+            String errorMsg = response.errorBody() != null ? response.errorBody().string() : "Empty error body";
+            new RuntimeException("Error calling esternal api " + errorMsg);
         }
         return response.body();
     }
 
     @Override
     public UserDto checkPassword(LoginDto loginDto) throws IOException {
+        Response<UserDto> response = userApiService.checkUser(loginDto).execute();
 
-        Response<UserDto> response = userApiService.checkUser(loginDto)
-                .execute();
-
-        if(!response.isSuccessful() || response.body() == null){
-            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+        if (!response.isSuccessful() || response.body() == null) {
+            String errorMsg = response.errorBody() != null ? response.errorBody().string() : "Empty error body";
+            throw new RuntimeException("Error calling external API: " + errorMsg);
         }
-
-        System.out.println("datos"  + response.body());
 
         return response.body();
     }
+
 
     @Override
     public void registerUser(UserDto userDto, String password) throws IOException {
@@ -56,7 +56,8 @@ public class UserServiceImpl implements UserService {
                 .execute();
 
         if(!response.isSuccessful() || response.body() == null){
-            new RuntimeException("Error calling esternal api" + response.errorBody().string());
+            String errorMsg = response.errorBody() != null ? response.errorBody().string() : "Empty error body";
+            throw new RuntimeException("Error calling external API: " + errorMsg);
         }
 
         String code = response.body().get("verification code");
@@ -71,12 +72,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void verifyUser(String code) throws IOException {
-        Response<Map<String, String>> response = userApiService.verifyUser(code)
+        Response<Map<String,String>> response = userApiService.verifyUser(code)
                 .execute();
 
-        if (!response.isSuccessful() || response.body() == null) {
-            throw new RuntimeException("Error calling external API: " + response.errorBody().string());
+        if(!response.isSuccessful() || response.body() == null){
+            String errorMsg = response.errorBody() != null ? response.errorBody().string() : "Empty error body";
+            throw new RuntimeException("Error calling external API: " + errorMsg);
         }
-    }
 
+    }
 }

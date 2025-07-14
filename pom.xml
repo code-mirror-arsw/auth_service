@@ -12,9 +12,10 @@
 	</parent>
 
 	<groupId>com.code-room</groupId>
-	<artifactId>api-gateway</artifactId>
-	<name>api-gateway</name>
-	<description>Gateway central with JWT authentication</description>
+	<artifactId>auth-service</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<name>auth-service</name>
+	<description>micro service handling authentication</description>
 
 	<properties>
 		<java.version>17</java.version>
@@ -74,6 +75,7 @@
 			<version>2.6.0</version>
 		</dependency>
 
+
 		<!-- Retrofit -->
 		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
@@ -98,6 +100,14 @@
 			<version>${org.mapstruct.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-gateway</artifactId>
+		</dependency>
+
+
+
 
 		<!-- Test -->
 		<dependency>

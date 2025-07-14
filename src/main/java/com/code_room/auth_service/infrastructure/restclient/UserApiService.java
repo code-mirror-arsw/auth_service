@@ -3,6 +3,7 @@ package com.code_room.auth_service.infrastructure.restclient;
 
 import com.code_room.auth_service.infrastructure.controller.dto.LoginDto;
 import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 

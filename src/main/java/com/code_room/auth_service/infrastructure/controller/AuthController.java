@@ -33,7 +33,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
         catch (Exception e) {
-            Map<String, String> error = Map.of("message", "Invalid email or password","code",e.getMessage() );
+            Map<String, String> error = Map.of("message", e.getMessage(),"code","403");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
         }
     }
