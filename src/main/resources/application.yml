@@ -5,6 +5,9 @@ server:
 spring:
   application:
     name: API-GATEWAY
+    restclient:
+      user:
+        url: http://20.63.88.120:8081/services/be/user-service/
 
   cloud:
     gateway:
@@ -16,7 +19,7 @@ spring:
 
       routes:
         - id: user-service
-          uri: http://20.63.88.120:8080
+          uri: http://20.63.88.120:8081
           predicates:
             - Path=/services/be/user-service/**
         - id: offer-service
