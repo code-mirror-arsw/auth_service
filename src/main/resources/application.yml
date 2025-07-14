@@ -1,6 +1,6 @@
 server:
   port: 8280
-  forward-headers-strategy: framework  # Reconoce headers como X-Forwarded-Proto en Azure
+  forward-headers-strategy: framework
 
 spring:
   application:
