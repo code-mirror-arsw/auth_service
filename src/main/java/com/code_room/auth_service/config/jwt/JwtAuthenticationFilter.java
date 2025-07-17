@@ -1,4 +1,4 @@
-package com.code_room.auth_service.config.jwt;   // usa tu paquete del Gateway
+package com.code_room.auth_service.config.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -18,7 +18,7 @@ import java.util.Base64;
 public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Value("${jwt.signature}")
-    private String jwtSecret;
+    private String jwtSecretBase64;
 
     @Override
     public Mono<Void> filter(ServerWebExchange ex, GatewayFilterChain chain) {
@@ -37,15 +37,16 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         try {
             String token = auth.substring(7);
-            byte[] key   = Base64.getDecoder().decode(jwtSecret);
-            Claims c = Jwts.parser()
+            byte[] key = Base64.getDecoder().decode(jwtSecretBase64);
+
+            Claims claims = Jwts.parser()
                     .setSigningKey(Keys.hmacShaKeyFor(key))
                     .parseClaimsJws(token)
                     .getBody();
 
             return chain.filter(ex.mutate()
                     .request(ex.getRequest().mutate()
-                            .header("user-id", c.getSubject())
+                            .header("user-id", claims.getSubject())
                             .build())
                     .build());
 
@@ -53,7 +54,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             return unauthorized(ex, "Invalid JWT: " + e.getMessage());
         }
     }
-
 
     private Mono<Void> unauthorized(ServerWebExchange ex, String msg){
         ex.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

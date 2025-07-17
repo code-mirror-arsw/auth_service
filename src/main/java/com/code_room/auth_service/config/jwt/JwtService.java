@@ -3,14 +3,14 @@ package com.code_room.auth_service.config.jwt;
 import com.code_room.auth_service.domain.ports.UserService;
 import com.code_room.auth_service.infrastructure.controller.dto.RefreshTokenRequest;
 import com.code_room.auth_service.infrastructure.restclient.dto.UserDto;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,7 +19,7 @@ import java.util.Map;
 public class JwtService {
 
     @Value("${jwt.signature}")
-    private String secretKey;
+    private String secretKeyBase64;
 
     @Value("${jwt.expiration}")
     private long expirationMillis;
@@ -28,7 +28,11 @@ public class JwtService {
     private long refreshExpirationMillis;
 
     @Autowired
-    private UserService userService;
+    UserService userService;
+
+    private byte[] getSecretKey() {
+        return Base64.getDecoder().decode(secretKeyBase64);
+    }
 
     public String generateToken(UserDto user) {
         return buildToken(user, expirationMillis);
@@ -44,13 +48,13 @@ public class JwtService {
                 .claim("role", user.getRole().name())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(SignatureAlgorithm.HS256, secretKey.getBytes())
+                .signWith(Keys.hmacShaKeyFor(getSecretKey()), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public Claims extractAllClaims(String token) {
         return Jwts.parser()
-                .setSigningKey(secretKey.getBytes())
+                .setSigningKey(Keys.hmacShaKeyFor(getSecretKey()))
                 .parseClaimsJws(token)
                 .getBody();
     }
@@ -81,7 +85,6 @@ public class JwtService {
         UserDto user = userService.findByEmail(email);
 
         String newAccessToken = buildToken(user, expirationMillis);
-
         String newRefreshToken = generateRefreshToken(user);
 
         return Map.of(
@@ -89,7 +92,6 @@ public class JwtService {
                 "refresh_token", newRefreshToken,
                 "user_id", user.getIdentification()
         );
-
     }
 
     public Map<String,String> buildResponseLogin(UserDto user){

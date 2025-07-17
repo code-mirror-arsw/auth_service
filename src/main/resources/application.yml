@@ -7,7 +7,7 @@ spring:
     name: API-GATEWAY
     restclient:
       user:
-        url: http://20.63.88.120:8081/services/be/user-service/
+        url: http://localhost:8081/services/be/user-service/
 
   cloud:
     gateway:
@@ -19,23 +19,29 @@ spring:
 
       routes:
         - id: user-service
-          uri: http://20.63.88.120:8081
+          uri: http://localhost:8081
           predicates:
             - Path=/services/be/user-service/**
+
+        - id: code-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/services/be/code-service/**
+
         - id: offer-service
-          uri: http://20.63.88.120:8080
+          uri: http://localhost:8082
           predicates:
             - Path=/services/be/offer-service/**
         - id: interview-service
-          uri: http://20.63.88.120:8083
+          uri: http://localhost:8083
           predicates:
             - Path=/services/be/interview-service/**
         - id: audio-service
-          uri: http://20.63.88.120:8084
+          uri: http://localhost:8084
           predicates:
             - Path=/services/be/stream-service/**
         - id: stream-ws
-          uri: ws://20.63.88.120:8084
+          uri: ws://localhost:8084
           predicates:
             - Path=/services/be/stream-service/**
 
@@ -51,20 +57,16 @@ spring:
           starttls:
             enable: true
 
-springdoc:
-  swagger-ui:
-    enabled: true
-    path: /swagger-ui.html
-    urls:
-      - name: user-service
-        url: /services/be/user-service/v3/api-docs
-      - name: offer-service
-        url: /services/be/offer-service/v3/api-docs
-      - name: interview-service
-        url: /services/be/interview-service/v3/api-docs
+doc:
+  api:
+    path: /doc/api
+    title: auth API
+    description: Documentation for the Auth API
+    version: 1.0.0
+
 
 jwt:
-  signature: L3OaW5Jv7f9qT8U0pD7rYkJ9u3PxMfBcXlZAnKj2hFs=
+  signature: gKZpDd8M3vXt7XLGlbZG2dFv1F5LSK+QAcX9A4qVq2aLbEEMww6slvENxwX+9Q27FO3EtzNbdRYJ7xKAlv3dMw==
   expiration: 3600000  # 1 hora
   refresh-expiration: 86400000  # 24 horas
 
