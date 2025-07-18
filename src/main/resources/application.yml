@@ -66,7 +66,7 @@ doc:
 
 
 jwt:
-  signature: ${{ secrets.SIGNATURE }}
+  signature: gKZpDd8M3vXt7XLGlbZG2dFv1F5LSK+QAcX9A4qVq2aLbEEMww6slvENxwX+9Q27FO3EtzNbdRYJ7xKAlv3dMw==
   expiration: 3600000  # 1 hora
   refresh-expiration: 86400000  # 24 horas
 
