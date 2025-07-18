@@ -8,15 +8,33 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service implementation responsible for sending email notifications related to user authentication.
+ * Implements the {@link SendEmailService} interface.
+ */
 @Service
 public class SendEmailServiceImpl implements SendEmailService {
 
+    /**
+     * JavaMailSender used to create and send MIME emails.
+     */
     @Autowired
     private JavaMailSender mailSender;
 
+    /**
+     * Email address used as the sender, configured via application properties.
+     */
     @Value("${spring.mail.username}")
     private String from;
 
+    /**
+     * Sends a registration success email containing a verification code to the specified recipient.
+     *
+     * @param to               the recipient's email address
+     * @param name             the recipient's name for personalization in the email
+     * @param verificationCode the verification code required to complete registration
+     * @throws RuntimeException if an error occurs while sending the email
+     */
     @Override
     public void sendRegistrationSuccessEmail(String to, String name, String verificationCode) {
         try {
@@ -40,6 +58,13 @@ public class SendEmailServiceImpl implements SendEmailService {
         }
     }
 
+    /**
+     * Sends an email notifying the recipient that their account has already been verified.
+     *
+     * @param to   the recipient's email address
+     * @param name the recipient's name for personalization in the email
+     * @throws RuntimeException if an error occurs while sending the email
+     */
     @Override
     public void sendAlreadyVerifiedEmail(String to, String name) {
         try {
@@ -63,9 +88,13 @@ public class SendEmailServiceImpl implements SendEmailService {
         }
     }
 
-
-
-
+    /**
+     * Generates the HTML content for the registration success email.
+     *
+     * @param name the recipient's name to personalize the email
+     * @param code the verification code to be included in the email
+     * @return a String containing the full HTML email body
+     */
     private String generateRegistrationSuccessBody(String name, String code) {
         return "<!DOCTYPE html>" +
                 "<html><head><style>" +
@@ -91,8 +120,12 @@ public class SendEmailServiceImpl implements SendEmailService {
                 "</div></body></html>";
     }
 
-
-
+    /**
+     * Generates the HTML content for the email informing the user their account is already verified.
+     *
+     * @param name the recipient's name to personalize the email
+     * @return a String containing the full HTML email body
+     */
     private String generateAlreadyVerifiedBody(String name) {
         return "<!DOCTYPE html>" +
                 "<html><head><style>" +

@@ -15,6 +15,12 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+/**
+ * JWT filter that intercepts HTTP requests to authenticate users based on JWT tokens.
+ *
+ * <p>This filter extracts the JWT token from the Authorization header, validates it,
+ * fetches the user details, and sets the security context for downstream handlers.
+ */
 @Component
 public class JwtFilter implements WebFilter {
 
@@ -24,6 +30,13 @@ public class JwtFilter implements WebFilter {
     @Autowired
     private UserService userService;
 
+    /**
+     * Filters incoming requests and attempts to authenticate the user if a valid JWT token is present.
+     *
+     * @param exchange the current server exchange containing the request and response
+     * @param chain the web filter chain to delegate to the next filter
+     * @return a Mono that completes when request processing is done
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 

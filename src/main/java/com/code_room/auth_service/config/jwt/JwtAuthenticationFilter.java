@@ -13,6 +13,13 @@ import reactor.core.publisher.Mono;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * A global gateway filter that intercepts HTTP requests to validate JWT tokens.
+ *
+ * <p>This filter checks the Authorization header for a Bearer token, verifies the JWT,
+ * and injects the user ID from the token into the request headers if the token is valid.
+ * Requests to certain paths or websocket upgrades bypass this filter.
+ */
 @Component
 @Order(0)
 public class JwtAuthenticationFilter implements GlobalFilter {
@@ -20,6 +27,13 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     @Value("${jwt.signature}")
     private String jwtSecretBase64;
 
+    /**
+     * Filters incoming HTTP requests to validate JWT tokens.
+     *
+     * @param ex the current server web exchange containing the HTTP request and response
+     * @param chain the gateway filter chain to delegate to the next filter
+     * @return a Mono that completes when request processing finishes
+     */
     @Override
     public Mono<Void> filter(ServerWebExchange ex, GatewayFilterChain chain) {
 
@@ -55,6 +69,13 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         }
     }
 
+    /**
+     * Helper method to return a 401 Unauthorized response with a custom message.
+     *
+     * @param ex the current server web exchange
+     * @param msg the message to include in the response body
+     * @return a Mono signaling completion of the response write operation
+     */
     private Mono<Void> unauthorized(ServerWebExchange ex, String msg){
         ex.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         var buf = ex.getResponse().bufferFactory().wrap(msg.getBytes(StandardCharsets.UTF_8));
