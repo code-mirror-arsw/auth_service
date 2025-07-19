@@ -32,10 +32,7 @@ public class CorsConfig {
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-
-        // Agrega aquí los orígenes permitidos
         corsConfig.addAllowedOrigin("http://localhost:5173");
-        corsConfig.addAllowedOrigin("http://localhost:5000");
         corsConfig.addAllowedOrigin("https://victorious-water-0ec758310.2.azurestaticapps.net");
 
         corsConfig.addAllowedMethod("*");
