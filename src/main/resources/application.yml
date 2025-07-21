@@ -40,10 +40,16 @@ spring:
           uri: http://20.106.32.210:8084
           predicates:
             - Path=/services/be/stream-service/**
-        - id: stream-ws
+        - id: audio-ws
           uri: ws://20.106.32.210:8084
           predicates:
-            - Path=/services/be/stream-service/**
+            - Path=/services/be/stream-service/ws/**
+
+        - id: yjs-ws
+          uri: ws://20.106.32.210:8084
+          predicates:
+            - Path=/services/be/stream-service/yjs/**
+
 
   mail:
     host: smtp.gmail.com
