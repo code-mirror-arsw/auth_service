@@ -112,7 +112,7 @@ public class SendEmailServiceImpl implements SendEmailService {
                 "<p>Tu cuenta ha sido registrada correctamente. Para completar tu registro, por favor usa el siguiente código de verificación</p>" +
                 "<div class='code-box'>" + code + "</div>" +
                 "<p>En el siguiente link</p> " +
-                "<a href='http://localhost:5173/verificacion' class='btn'>http://localhost:5173/verificacion</a>" +
+                "<a href='https://victorious-water-0ec758310.2.azurestaticapps.net/verificacion' class='btn'>https://victorious-water-0ec758310.2.azurestaticapps.net/verificacion</a>" +
                 "<p style='margin-top:25px;'>Si no fuiste tú quien realizó esta solicitud, puedes ignorar este mensaje.</p>" +
                 "<p>¡Gracias por formar parte de <strong>Code Room</strong>! 🚀</p>" +
                 "<p><strong>– El equipo de Code Room 🧠</strong></p>" +
