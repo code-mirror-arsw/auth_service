@@ -19,6 +19,7 @@ spring:
         - AddResponseHeader=Access-Control-Allow-Headers, Origin, Content-Type, Accept, Authorization
 
 
+
       routes:
         - id: user-service
           uri: http://20.63.88.120:8081
