@@ -24,7 +24,7 @@ spring:
             - Path=/services/be/user-service/**
 
         - id: code-service
-          uri: http://20.63.88.120:8086
+          uri: http://20.106.32.210:8086
           predicates:
             - Path=/services/be/code-service/**
 
@@ -37,11 +37,11 @@ spring:
           predicates:
             - Path=/services/be/interview-service/**
         - id: audio-service
-          uri: http://20.63.88.120:8084
+          uri: http://20.106.32.210:8084
           predicates:
             - Path=/services/be/stream-service/**
         - id: stream-ws
-          uri: ws://20.63.88.120:8084
+          uri: ws://20.106.32.210:8084
           predicates:
             - Path=/services/be/stream-service/**
 
