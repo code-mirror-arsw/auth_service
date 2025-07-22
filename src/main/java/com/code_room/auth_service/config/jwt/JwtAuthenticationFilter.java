@@ -14,72 +14,57 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * A global gateway filter that intercepts HTTP requests to validate JWT tokens.
- *
- * <p>This filter checks the Authorization header for a Bearer token, verifies the JWT,
- * and injects the user ID from the token into the request headers if the token is valid.
- * Requests to certain paths or websocket upgrades bypass this filter.
+ * Global Gateway filter to validate JWT tokens.
+ * Skips WebSocket (Upgrade) and any route starting with `/services/be/stream-service/ws`
  */
 @Component
 @Order(0)
 public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Value("${jwt.signature}")
-    private String jwtSecretBase64;
+    private String jwtSecret;
 
-    /**
-     * Filters incoming HTTP requests to validate JWT tokens.
-     *
-     * @param ex the current server web exchange containing the HTTP request and response
-     * @param chain the gateway filter chain to delegate to the next filter
-     * @return a Mono that completes when request processing finishes
-     */
     @Override
-    public Mono<Void> filter(ServerWebExchange ex, GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        String upgradeHeader = exchange.getRequest().getHeaders().getFirst("Upgrade");
+        String path = exchange.getRequest().getURI().getPath();
 
-        String path = ex.getRequest().getURI().getPath();
+        if (upgradeHeader != null && upgradeHeader.equalsIgnoreCase("websocket")) {
+            return chain.filter(exchange);
+        }
 
-        if ("websocket".equalsIgnoreCase(ex.getRequest().getHeaders().getFirst("Upgrade")))
-            return chain.filter(ex);
+        if (path.contains("/stream-service/ws")) {
+            return chain.filter(exchange);
+        }
 
-        if (path.startsWith("/services/be/stream-service/ws"))
-            return chain.filter(ex);
-
-        String auth = ex.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (auth == null || !auth.startsWith("Bearer "))
-            return unauthorized(ex, "Missing Authorization header");
+        String auth = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            return unauthorized(exchange, "Missing Authorization header");
+        }
 
         try {
             String token = auth.substring(7);
-            byte[] key = Base64.getDecoder().decode(jwtSecretBase64);
-
+            byte[] key = Base64.getDecoder().decode(jwtSecret);
             Claims claims = Jwts.parser()
                     .setSigningKey(Keys.hmacShaKeyFor(key))
                     .parseClaimsJws(token)
                     .getBody();
 
-            return chain.filter(ex.mutate()
-                    .request(ex.getRequest().mutate()
+            return chain.filter(exchange.mutate()
+                    .request(exchange.getRequest().mutate()
                             .header("user-id", claims.getSubject())
                             .build())
                     .build());
 
         } catch (JwtException e) {
-            return unauthorized(ex, "Invalid JWT: " + e.getMessage());
+            return unauthorized(exchange, "Invalid JWT: " + e.getMessage());
         }
     }
 
-    /**
-     * Helper method to return a 401 Unauthorized response with a custom message.
-     *
-     * @param ex the current server web exchange
-     * @param msg the message to include in the response body
-     * @return a Mono signaling completion of the response write operation
-     */
-    private Mono<Void> unauthorized(ServerWebExchange ex, String msg){
-        ex.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-        var buf = ex.getResponse().bufferFactory().wrap(msg.getBytes(StandardCharsets.UTF_8));
-        ex.getResponse().getHeaders().add("Content-Type", "text/plain");
-        return ex.getResponse().writeWith(Mono.just(buf));
+    private Mono<Void> unauthorized(ServerWebExchange exchange, String msg) {
+        exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+        var buf = exchange.getResponse().bufferFactory().wrap(msg.getBytes(StandardCharsets.UTF_8));
+        exchange.getResponse().getHeaders().add("Content-Type", "text/plain");
+        return exchange.getResponse().writeWith(Mono.just(buf));
     }
 }

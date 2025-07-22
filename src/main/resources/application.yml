@@ -12,10 +12,11 @@ spring:
   cloud:
     gateway:
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_FIRST
-        - AddResponseHeader=Access-Control-Allow-Origin, https://victorious-water-0ec758310.2.azurestaticapps.net
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_FIRST
+        - AddResponseHeader=Access-Control-Allow-Origin, *
         - AddResponseHeader=Access-Control-Allow-Methods, GET, POST, PUT, DELETE, OPTIONS
         - AddResponseHeader=Access-Control-Allow-Headers, *
+
 
       routes:
         - id: user-service
@@ -40,16 +41,10 @@ spring:
           uri: http://20.106.32.210:8084
           predicates:
             - Path=/services/be/stream-service/**
-        - id: audio-ws
+        - id: stream-ws
           uri: ws://20.106.32.210:8084
           predicates:
-            - Path=/services/be/stream-service/ws/**
-
-        - id: yjs-ws
-          uri: ws://20.106.32.210:8084
-          predicates:
-            - Path=/services/be/stream-service/yjs/**
-
+            - Path=/services/be/stream-service/**
 
   mail:
     host: smtp.gmail.com
