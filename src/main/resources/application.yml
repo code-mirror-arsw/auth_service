@@ -12,12 +12,10 @@ spring:
   cloud:
     gateway:
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin, RETAIN_FIRST
+        - DedupeResponseHeader=Access-Control-Allow-Origin, RETAIN_FIRST
         - AddResponseHeader=Access-Control-Allow-Origin, https://victorious-water-0ec758310.2.azurestaticapps.net
         - AddResponseHeader=Access-Control-Allow-Methods, GET, POST, PUT, DELETE, OPTIONS
-        - AddResponseHeader=Access-Control-Allow-Headers, Origin, Content-Type, Accept, Authorization
-
-
+        - AddResponseHeader=Access-Control-Allow-Headers, *
 
       routes:
         - id: user-service
