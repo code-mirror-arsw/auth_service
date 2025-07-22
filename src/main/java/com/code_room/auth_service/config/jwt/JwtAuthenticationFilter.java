@@ -21,6 +21,7 @@ import java.util.Base64;
 @Order(0)
 public class JwtAuthenticationFilter implements GlobalFilter {
 
+
     @Value("${jwt.signature}")
     private String jwtSecret;
 
